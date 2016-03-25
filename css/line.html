@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>移动端0.5px细线的视线</title>
+</head>
+<style type="text/css">
+	#div{
+		width: 100px;
+		height: 20px;
+		margin-top: 100px;
+		background-color: #eee;
+	}
+	.border-t::before {
+	    width: 200%;
+	    height: 1px;
+	    content: "";
+	    display: block;
+	    position: absolute;
+	    left: -50%;
+	    background: #dcdcdc;
+	    transform: scale(0.5);
+	    -webkit-transform: scale(0.5);
+    }
+
+	.border-b::after {
+	    width: 200%;
+	    height: 1px;
+	    content: "";
+	    display: block;
+	    position: absolute;
+	    left: -50%;
+	    right: 0;
+	    background: #dcdcdc;
+	    transform: scale(0.5);
+	    -webkit-transform: scale(0.5);
+    }
+
+    .border-l::before {
+	    width: 1px;
+	    height: 200%;
+	    content: "";
+	    display: block;
+	    position: absolute;
+	    top: -50%;
+	    background: #dcdcdc;
+	    transform: scale(0.5);
+	    -webkit-transform: scale(0.5);
+    }
+    .border-r::after {
+	    width: 1px;
+	    content: "";
+	    right: 0;
+	    height: 200%;
+	    top: -50%;
+	    position: absolute;
+	    background: #dcdcdc;
+	    transform: scale(0.5);
+	    -webkit-transform: scale(0.5);
+	    bottom: 0;
+    }
+</style>
+<body>
+	<div id="div" class="border-t">上边框</div>
+	<div id="div" class="border-b">下边框</div>
+	<div id="div" class="border-l">左边框</div>
+	<div id="div" class="border-r">右边框</div>
+</body>
+</html>
