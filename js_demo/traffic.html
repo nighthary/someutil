@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+
+<body>
+    <style type="text/css">
+        #traffic>li {
+            display: block;
+        }
+
+        #traffic span {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-color: gray;
+            margin: 5px;
+            border-radius: 100%;
+        }
+
+        #traffic.stop li:nth-child(1) span {
+            background-color: #a00;
+        }
+
+        #traffic.wait li:nth-child(2) span {
+            background-color: #aa0;
+        }
+
+        #traffic.pass li:nth-child(3) span {
+            background-color: #0a0;
+        }
+
+    </style>
+    <div id="traffic" class="wait">
+        <li><span></span></li>
+        <li><span></span></li>
+        <li><span></span></li>
+    </div>
+</body>
+
+<script type="text/javascript">
+    <!--简单通过Promise实现的红绿灯-->
+
+    function doTraffic() {
+        const traffic = document.getElementById('traffic');
+
+        function setState(state) {
+            traffic.className = state;
+        }
+
+        function wait(time) {
+            return new Promise(resolve => setTimeout(resolve, time))
+        }
+
+        const states = [{
+            state: 'wait',
+            time: 1000
+        }, {
+            state: 'stop',
+            time: 2000
+        }, {
+            state: 'pass',
+            time: 3000
+        }];
+
+        let zIndex = 0;
+
+        function start() {
+            Promise.resolve()
+                .then(zIndex > states.length - 1 ? zIndex = 0 : zIndex)
+                .then(setState.bind(null, states[zIndex].state))
+                .then(wait.bind(null, states[zIndex].time))
+                .then(zIndex++)
+                .then(start);
+        }
+        start();
+    }
+    // doTraffic();
+
+</script>
+
+
+<script>
+    <!--面向对象、过程抽象、Promise等方法 实现了红绿灯的切换-->
+    function doTraffic_01() {
+        const trafficEl = document.getElementById('traffic');
+
+        class TrafficProtocol {
+            constructor(el, reset) {
+                this.subject = el;
+                this.autoReset = reset;
+                this.stateList = [];
+            }
+
+            pushState(fn) {
+                this.stateList.push(fn)
+            }
+
+            reset() {
+                let subject = this.subject;
+
+                this.statePromise = Promise.resolve();
+                this.stateList.forEach((stateFn) => {
+                    this.statePromise = this.statePromise.then(() => {
+                        return new Promise(resolve => {
+                            stateFn(subject, resolve)
+                        })
+                    })
+                })
+
+                if (this.autoReset) {
+                    this.statePromise.then(this.reset.bind(this))
+                }
+            }
+
+            start() {
+                this.reset();
+            }
+        }
+
+
+        var traffic = new TrafficProtocol(trafficEl, true);
+
+        traffic.pushState((subject, next) => {
+            subject.className = 'wait';
+            setTimeout(next, 1000)
+        });
+
+        traffic.pushState((subject, next) => {
+            subject.className = 'stop';
+            setTimeout(next, 2000)
+        });
+
+        traffic.pushState((subject, next) => {
+            subject.className = 'pass';
+            setTimeout(next, 3000)
+        });
+
+        traffic.start();
+    }
+    doTraffic_01();
+
+</script>
+
+</html>

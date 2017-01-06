@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width = device-width, initial-scale = 1.0">
+    <title>PhotoSwipe_Demo</title>
+    <link rel="stylesheet" href="photoswipe.css">
+</head>
+
+<body>
+    <style type="text/css">
+    img {
+        width: 80%;
+        margin: 0 auto;
+        position: relative;
+        height: auto;
+    }
+
+    .img-container {
+        width: 80%;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .img-container img {
+        width: 100%;
+        height: auto;
+    }
+
+    .pswp__img {}
+    </style>
+    <div class="img-container">
+        <img id="img1" src="http://pic1.nipic.com/2008-10-27/2008102711175389_2.jpg" alt="">
+        <img id="img2" src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2929767554,3425826212&fm=116&gp=0.jpg" alt="">
+        <img id="img3" src="https://ss3.baidu.com/-fo3dSag_xI4khGko9WTAnF6hhy/image/h%3D200/sign=593f67d3c0fcc3ceabc0ce33a244d6b7/1f178a82b9014a90e82cad4ca1773912b31bee35.jpg" alt="">
+    </div>
+    <div class="pswp" >
+        <div class="pswp__bg"></div>
+        <div class="pswp__scroll-wrap">
+            <div class="pswp__container">
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+            </div>
+            <div class="pswp__ui pswp__ui--hidden">
+                <div class="pswp__top-bar">
+                    <div class="pswp__counter"></div>
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                            <div class="pswp__preloader__cut">
+                                <div class="pswp__preloader__donut"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="photoswipe.min.js"></script>
+    <script src="photoswipe-ui-default.min.js"></script>
+</body>
+<script type="text/javascript">
+<!--from http://photoswipe.com -->
+var openPhotoSwipe = function(e) {
+    var target = e.currentTarget;
+    var pswpElement = document.querySelectorAll('.pswp')[0];
+    var imgObj = getWH(target);
+    var item = {
+        w: imgObj.width,
+        h: imgObj.height,
+        src: target.src
+    };
+    var img = document.querySelectorAll('.img-container img');
+    var items = [];
+    items.push(item);
+    for (var i = 0; i < img.length; i++) {
+        if (img[i].id !== target.id) {
+            var temp = getWH(img[i]);
+            var item = {
+                w: temp.width,
+                h: temp.height
+            }
+            item.src = img[i].src;
+            items.push(item);
+        }
+
+    }
+
+    // // build items array
+    // var items = [{
+    //     src: 'http://img1.imgtn.bdimg.com/it/u=15561503,175246310&fm=21&gp=0.jpg',
+    //     w: 964,
+    //     h: 1024
+    // }, {
+    //     src: 'http://pic1.nipic.com/2008-10-27/2008102711175389_2.jpg',
+    //     w: 1024,
+    //     h: 683
+    // }];
+
+    // define options (if needed)
+    var options = {
+        focus: false,
+        loop: true,
+        closeOnVerticalDrag: false,
+    };
+
+    var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+    gallery.init();
+    document.querySelectorAll('.pswp__container .pswp__item')[0].addEventListener('click', function() {
+        gallery.close();
+    });
+};
+
+// openPhotoSwipe();
+// gallery.close();
+document.getElementById('img1').onclick = openPhotoSwipe;
+document.getElementById('img2').onclick = openPhotoSwipe;
+document.getElementById('img3').onclick = openPhotoSwipe;
+
+
+function getWH(el) {
+    var obj = {};
+    var img = new Image();
+    img.src = el.src;
+    obj.width = img.width; //图片实际宽度
+    obj.height = img.height; //图片实际宽度
+    return obj;
+}
+</script>
+
+</html>
