@@ -1,3 +1,7 @@
+#插件地址
+
+[插件地址](https://github.com/nighthary/someutil)
+
 # someutil
 一些自己收集的js小工具（from internet & write by myself）
 
