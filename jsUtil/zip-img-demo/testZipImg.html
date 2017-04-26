@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title> New Document </title>
+    <meta name="Generator" content="EditPlus">
+    <meta name="Author" content="">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+</head>
+
+<body>
+<style type="text/css">
+
+    #img001{
+        width: 200px;
+        height: auto;
+        border: 1px solid red;
+        min-height: 100px;
+    }
+    #myCanvas{
+        border: 1px solid #eee;
+    }
+</style>
+<script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="./exif-js.js"></script>
+    <script type="text/javascript" src="./uiFitImage.js"></script>
+    <script type="text/javascript">
+    var result = document.getElementById("result");
+    var imgUrl = "";
+    var file = document.getElementById("file");
+
+    //判断浏览器是否支持FileReader接口
+    if (typeof FileReader == 'undefined') {
+        result.InnerHTML = "<p>你的浏览器不支持FileReader接口！</p>";
+        //使选择控件不可操作
+        file.setAttribute("disabled", "disabled");
+    }
+
+    function readAsDataURL() {
+        //检验是否为图像文件
+        var file = document.getElementById("file").files[0];
+        if (!/image\/\w+/.test(file.type)) {
+            alert("看清楚，这个需要图片！");
+            return false;
+        }
+        var reader = new FileReader();
+        //将文件以Data URL形式读入页面
+        reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            var result = document.getElementById("result");
+            imgUrl = e.target.result
+            //显示文件
+            result.innerHTML = '<img style="width:200px;height:auto" src="' + e.target.result + '" alt="" />';
+        }
+    }
+
+    function zipImg1() {
+        zipImg({
+            resizeMode: "auto",
+            dataSource: imgUrl,
+            dataSourceType: "base64",
+            maxWidth: 500, //允许的最大宽度
+            maxHeight: 500, //允许的最大高度。
+            onTmpImgGenerate: function(img) {},
+            success: function(resizeImgBase64, canvas) {
+                var myImg = document.getElementById('img001');
+                myImg.src = "data:image/png;base64" + resizeImgBase64;
+            },
+            debug: true
+        });
+    }
+    </script>
+    <p>
+        <label>请选择一个文件：</label>
+        <input type="file" id="file"/>
+        <input type="button" value="读取图像" onclick="readAsDataURL()" />
+        <input type="button" value="压缩图片" onclick="zipImg1()" />
+    </p>
+    <div id="result" name="result"></div>
+    <img id="img001" src="" alt="">
+</body>
+
+</html>

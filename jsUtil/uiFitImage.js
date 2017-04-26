@@ -1,5 +1,27 @@
-define(['exif-js'], function() {
+/**
+ * Created by chenas on 2016/4/28.
+ */
+define(['text!../profile/profile.json', 'jquery', 'underscore', '../../shared/js/exif-js'], function(Profile, $, _) {
+    var config = eval("(" + Profile + ")");
+    var imageType = config.imageType || {};
     return {
+        getSuitableImageUrl: function(url, type) {
+            if (url && type) {
+                var str = url.split('.');
+                return _.reduce(str, function(r, data, index) {
+                    if (index == 0) {
+                        return data;
+                    } else if (str.length > 1 && str.length - 1 == index) {
+                        return r + (imageType[type] || "") + "." + data;
+                    } else {
+                        return r + "." + data;
+                    }
+                }, "");
+
+                //return url+"?size="+type;
+            }
+            return url;
+        },
         /**
          *  压缩图片
          * @param  {[type]} opts [{
@@ -21,7 +43,7 @@ define(['exif-js'], function() {
                 dataSourceType: "image", //image  base64 canvas
                 maxWidth: 150, //允许的最大宽度
                 maxHeight: 200, //允许的最大高度。
-                beforeZip: function(){},//压缩之前执行的函数
+                beforeZip: function() {}, //压缩之前执行的函数
                 onTmpImgGenerate: function(img) {}, //当中间图片生成时候的执行方法。。这个时候请不要乱修改这图片，否则会打乱压缩后的结果。
                 success: function(resizeImgBase64, canvas) {}, //压缩成功后图片的base64字符串数据。
                 debug: false //是否开启调试模式。
@@ -57,21 +79,21 @@ define(['exif-js'], function() {
                     var img1 = new Image();
                     if (dataSourceType == "img" || dataSourceType == "image") {
                         img1.src = $(datasource).attr("src");
-                        img1.onload = function(){
+                        img1.onload = function() {
                             if (callback) {
                                 callback(img1);
                             }
                         }
                     } else if (dataSourceType == "base64") {
                         img1.src = datasource;
-                        img1.onload = function(){
+                        img1.onload = function() {
                             if (callback) {
                                 callback(img1);
                             }
                         }
                     } else if (dataSourceType == "canvas") {
                         img1.src = datasource.toDataURL("image/jpeg");
-                        img1.onload = function(){
+                        img1.onload = function() {
                             if (callback) {
                                 callback(img1);
                             }
@@ -79,7 +101,7 @@ define(['exif-js'], function() {
                     } else if (dataSourceType == "file") {
                         _me.getBase4FromImgFile(function(base64str) {
                             img1.src = base64str;
-                            img1.onload = function(){
+                            img1.onload = function() {
                                 if (callback) {
                                     callback(img1);
                                 }
@@ -94,7 +116,7 @@ define(['exif-js'], function() {
                         w: $(img)[0].naturalWidth,
                         h: $(img)[0].naturalHeight
                     };
-                    if(settings.debug){
+                    if (settings.debug) {
                         console.log("----真实尺寸----");
                         console.log(_img_info);
                     }
@@ -164,24 +186,28 @@ define(['exif-js'], function() {
                     canvas.height = theH;
                     var ctx = canvas.getContext('2d');
                     var orient = this.getPhotoOrientation(img);
-                    if(orient == 6){//如果图片是旋转过后的则先旋转画布再绘制图片
-                        ctx.save();//保存状态
-                        ctx.translate(theW / 2, theH / 2);//设置画布上的(0,0)位置，也就是旋转的中心点
-                        ctx.rotate(90 * Math.PI / 180);//把画布旋转90度
-                        // 执行Canvas的drawImage语句
-                        ctx.drawImage(img, -theH/2, -theW/2, theH, theW);
-                        ctx.restore();//恢复状态
-                    }else{
-                        ctx.drawImage(img,
-                            0, //sourceX,
-                            0, //sourceY,
-                            realW, //sourceWidth,
-                            realH, //sourceHeight,
-                            0, //destX,
-                            0, //destY,
-                            theW, //destWidth,
-                            theH //destHeight
-                        );
+                    switch (orient) {
+                        case 6: //需要顺时针（向左）90度旋转
+                            this.rotateImg(img, 'left', canvas);
+                            break;
+                        case 8: //需要逆时针（向右）90度旋转
+                            this.rotateImg(img, 'right', canvas);
+                            break;
+                        case 3: //需要180度旋转
+                            this.rotateImg(img, 'bottom', canvas); //转两次
+                            break;
+                        default:
+                            ctx.drawImage(img,
+                                0, //sourceX,
+                                0, //sourceY,
+                                realW, //sourceWidth,
+                                realH, //sourceHeight,
+                                0, //destX,
+                                0, //destY,
+                                theW, //destWidth,
+                                theH //destHeight
+                            );
+                            break;
                     }
                     //--获取base64字符串及canvas对象传给success函数。
                     var base64str = canvas.toDataURL("image/png");
@@ -190,18 +216,68 @@ define(['exif-js'], function() {
                     }
                 },
                 //获取图片旋转方向
-                getPhotoOrientation: function(img){
+                //0-1
+                //顺时针90度-6
+                //逆时针90度-8
+                //180度-3
+                getPhotoOrientation: function(img) {
                     var orient;
-                    EXIF.getData(img, function () {
+                    EXIF.getData(img, function() {
                         orient = EXIF.getTag(this, 'Orientation');
                     });
                     return orient;
+                },
+                rotateImg: function(img, direction, canvas) {
+                    //最小与最大旋转方向，图片旋转4次后回到原方向
+                    var min_step = 0;
+                    var max_step = 3;
+                    //var img = document.getElementById(pid);
+                    if (img == null) return;
+                    //img的高度和宽度不能在img元素隐藏后获取，否则会出错
+                    var height = canvas.height;
+                    var width = canvas.width;
+                    //var step = img.getAttribute('step');
+                    var step = 2;
+                    if (step == null) {
+                        step = min_step;
+                    }
+                    if (direction == 'right') {
+                        step++;
+                        //旋转到原位置，即超过最大值
+                        step > max_step && (step = min_step);
+                    } else if (direction == 'bottom') { //旋转180度
+                        step = 2;
+                    } else {
+                        step--;
+                        step < min_step && (step = max_step);
+                    }
+                    //旋转角度以弧度值为参数
+                    var degree = step * 90 * Math.PI / 180;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillRect(0, 0, 200, 200);
+                    switch (step) {
+                        case 0:
+                            ctx.drawImage(img, 0, 0);
+                            break;
+                        case 1:
+                            ctx.rotate(degree);
+                            ctx.drawImage(img, 0, -height, width, height);
+                            break;
+                        case 2:
+                            ctx.rotate(degree);
+                            ctx.drawImage(img, -width, -height, width, height);
+                            break;
+                        case 3:
+                            ctx.rotate(degree);
+                            ctx.drawImage(img, -width, 0, width, height);
+                            break;
+                    }
                 }
             };
 
             //--开始处理。
             (function() {
-                if(settings.beforeZip){
+                if (settings.beforeZip) {
                     settings.beforeZip();
                 }
                 innerTools.getImgFromDataSource(settings.dataSource, settings.dataSourceType, function(_tmp_img) {
@@ -209,7 +285,7 @@ define(['exif-js'], function() {
                     settings.onTmpImgGenerate(_tmp_img);
                     //--计算尺寸。
                     var _limitSizeInfo = innerTools.getResizeSizeFromImg(__tmpImg);
-                    if(settings.debug){
+                    if (settings.debug) {
                         console.log("----压缩尺寸----");
                         console.log(_limitSizeInfo);
                     }
