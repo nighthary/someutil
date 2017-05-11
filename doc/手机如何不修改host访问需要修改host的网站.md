@@ -1,7 +1,7 @@
-###iPhone不越狱访问需要修改hosts的域名
+###手机不越狱/ROOT访问需要修改hosts的网站
 
 >需求来源:
->	网站需要升级HTTPS,但是最开始只开放单节点进行测试(通过修改hosts来访问),但是iPhone不越狱的时候是没办法修改hosts的,但是大家都不愿意把爱机随随便便的越狱,所以就有了在不越狱的前提下怎么进行测试
+>	网站需要升级HTTPS,但是最开始只开放单节点进行测试(通过修改hosts来访问),但是iPhone不越狱(Android不ROOT)的时候是没办法修改hosts的,但是大家都不愿意把爱机随随便便的越狱,所以就有了在不越狱的前提下怎么进行测试
 
 ###1.准备工具
 
@@ -23,6 +23,7 @@
 
 	[Chalres使用教程](http://blog.csdn.net/liguilicsdn/article/details/51208909)
 
+	[下载地址](https://www.charlesproxy.com/)
 *	2.电脑修改HOSTS
 
 		host路径
