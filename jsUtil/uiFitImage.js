@@ -1,27 +1,7 @@
-/**
- * Created by chenas on 2016/4/28.
- */
-define(['text!../profile/profile.json', 'jquery', 'underscore', '../../shared/js/exif-js'], function(Profile, $, _) {
+define(['./exif-js'], function() {
     var config = eval("(" + Profile + ")");
     var imageType = config.imageType || {};
     return {
-        getSuitableImageUrl: function(url, type) {
-            if (url && type) {
-                var str = url.split('.');
-                return _.reduce(str, function(r, data, index) {
-                    if (index == 0) {
-                        return data;
-                    } else if (str.length > 1 && str.length - 1 == index) {
-                        return r + (imageType[type] || "") + "." + data;
-                    } else {
-                        return r + "." + data;
-                    }
-                }, "");
-
-                //return url+"?size="+type;
-            }
-            return url;
-        },
         /**
          *  压缩图片
          * @param  {[type]} opts [{
