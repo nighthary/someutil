@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>安卓机大面积接触导致touchmove事件的处理</title>
+</head>
+<style>
+    .box {
+        width: 300px;
+        height: 300px;
+        background: red;
+        font-size: 20px;
+    }
+</style>
+
+<body>
+    <div class="box">
+        <p></p>
+        <p></p>
+    </div>
+
+    <script>
+
+        (function () {
+            var box = document.querySelector('.box');
+            var p1 = box.children[0];
+            var p2 = box.children[1];
+            var pos = {};
+            box.addEventListener('touchstart', function (e) {
+                p1.innerHTML = 'x:' + e.changedTouches[0].pageX + '<br/>y:' + e.changedTouches[0].pageY + '';
+                pos.x = Math.round(e.changedTouches[0].pageX);
+                pos.y = Math.round(e.changedTouches[0].pageY);
+            });
+            box.addEventListener('touchmove', function (e) {
+                var nowPos = {
+                    x: Math.round(e.changedTouches[0].pageX),
+                    y: Math.round(e.changedTouches[0].pageY)
+                };
+                if (nowPos.x === pos.x && nowPos.y === pos.y) {
+                    return // 直接返回掉
+                }
+                p2.innerHTML = 'x:' + nowPos.x + '<br/>y:' + nowPos.y + '';
+                pos = nowPos;
+            });
+        })();
+    </script>
+</body>
+
+</html>
